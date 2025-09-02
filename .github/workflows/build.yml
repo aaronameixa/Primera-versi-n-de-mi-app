@@ -22,8 +22,8 @@ jobs:
 
       - name: Instalar dependencias del sistema
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
+          apt-get update
+          apt-get install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
 
       - name: Instalar Buildozer y Cython
         run: |
@@ -34,7 +34,8 @@ jobs:
       # 🔹 Instalar yes y aceptar licencias del SDK
       - name: Instalar yes y aceptar licencias del SDK
         run: |
-          sudo apt-get install -y coreutils
+          apt-get update
+          apt-get install -y coreutils
           yes | sdkmanager --licenses
         shell: bash
         env:
