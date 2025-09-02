@@ -31,9 +31,12 @@ jobs:
           pip3 install cython==0.29.33
           pip3 install buildozer
 
-      # 🔹 Aceptar automáticamente las licencias de Android SDK
+      # 🔹 Aceptar automáticamente licencias del SDK
       - name: Aceptar licencias de Android SDK
-        run: yes | /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses
+        run: yes | sdkmanager --licenses
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          PATH: /usr/local/lib/android/sdk/cmdline-tools/latest/bin:/usr/local/lib/android/sdk/platform-tools:$PATH
 
       # 🔹 Compilar APK y guardar log
       - name: Compilar APK
