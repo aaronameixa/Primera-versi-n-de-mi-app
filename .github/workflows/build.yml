@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repo
@@ -23,7 +23,7 @@ jobs:
       - name: Instalar dependencias del sistema
         run: |
           sudo apt update
-          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
+          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-11-jdk
 
       - name: Instalar Buildozer y Cython
         run: |
