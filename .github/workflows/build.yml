@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 🔹 Crear credentials.json desde tu Secret privado
+      # Crear credentials.json desde Secret
       - name: Crear credentials.json desde secret
         run: echo "$GOOGLE_CREDENTIALS" > credentials.json
         shell: bash
@@ -22,38 +22,40 @@ jobs:
 
       - name: Instalar dependencias del sistema
         run: |
-          apt-get update
-          apt-get install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-pip python3-setuptools git zip unzip \
+            openjdk-8-jdk libncurses5 libstdc++6 libffi-dev \
+            libssl-dev automake autoconf libtool pkg-config \
+            zlib1g-dev
 
       - name: Instalar Buildozer y Cython
         run: |
           pip3 install --upgrade pip
-          pip3 install cython==0.29.33
-          pip3 install buildozer
+          pip3 install cython==0.29.33 buildozer
 
-      # 🔹 Instalar yes y aceptar licencias del SDK
-      - name: Instalar yes y aceptar licencias del SDK
+      # 🔹 Guardar Keystore desde Secret
+      - name: Crear keystore.jks
         run: |
-          apt-get update
-          apt-get install -y coreutils
-          yes | sdkmanager --licenses
-        shell: bash
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > keystore.jks
+
+      # 🔹 Compilar APK en release y firmar
+      - name: Compilar APK release
         env:
-          ANDROID_HOME: /usr/local/lib/android/sdk
-          PATH: /usr/local/lib/android/sdk/cmdline-tools/latest/bin:/usr/local/lib/android/sdk/platform-tools:$PATH
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          buildozer -v android release 2>&1 | tee build.log
 
-      # 🔹 Compilar APK y guardar log
-      - name: Compilar APK
-        run: buildozer -v android debug 2>&1 | tee build.log
-
-      # 🔹 Subir APK como artefacto descargable
-      - name: Subir APK como artefacto
+      # 🔹 Subir APK firmado como artefacto
+      - name: Subir APK firmado
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: bin/*.apk
+          name: app-release.apk
+          path: bin/*-release.apk
 
-      # 🔹 Subir log completo como artefacto
+      # 🔹 Subir log completo
       - name: Subir log de compilación
         uses: actions/upload-artifact@v4
         with:
