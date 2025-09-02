@@ -23,7 +23,7 @@ jobs:
       - name: Instalar dependencias del sistema
         run: |
           sudo apt update
-          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-11-jdk
+          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
 
       - name: Instalar Buildozer y Cython
         run: |
@@ -31,11 +31,24 @@ jobs:
           pip3 install cython==0.29.33
           pip3 install buildozer
 
-      - name: Compilar APK
-        run: buildozer -v android debug
+      # 🔹 Aceptar automáticamente las licencias de Android SDK
+      - name: Aceptar licencias de Android SDK
+        run: yes | /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses
 
+      # 🔹 Compilar APK y guardar log
+      - name: Compilar APK
+        run: buildozer -v android debug 2>&1 | tee build.log
+
+      # 🔹 Subir APK como artefacto descargable
       - name: Subir APK como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
           path: bin/*.apk
+
+      # 🔹 Subir log completo como artefacto
+      - name: Subir log de compilación
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
