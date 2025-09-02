@@ -1,0 +1,41 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 🔹 Crear credentials.json desde tu Secret privado
+      - name: Crear credentials.json desde secret
+        run: echo "$GOOGLE_CREDENTIALS" > credentials.json
+        shell: bash
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-8-jdk
+
+      - name: Instalar Buildozer y Cython
+        run: |
+          pip3 install --upgrade pip
+          pip3 install cython==0.29.33
+          pip3 install buildozer
+
+      - name: Compilar APK
+        run: buildozer -v android debug
+
+      - name: Subir APK como artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug.apk
+          path: bin/*.apk
